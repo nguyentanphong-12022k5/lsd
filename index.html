@@ -11,13 +11,15 @@
         <h1>Luyện Tập Trắc Nghiệm Lịch Sử Đảng</h1>
         
         <div id="setup-screen" class="screen active">
-            <p>Tổng số câu hỏi: <span id="total-q-count">130</span></p>
-            <button id="start-btn" class="btn primary-btn">Bắt Đầu Luyện Tập</button>
+            <p>Tổng ngân hàng: <span id="total-q-count">130</span> câu hỏi</p>
+            <button id="start-btn" class="btn primary-btn">Luyện Tập (Toàn bộ)</button>
+            <button id="exam-btn" class="btn danger-btn">Thi Thử (60 câu - 60 phút)</button>
         </div>
 
         <div id="quiz-screen" class="screen">
             <div class="header">
                 <span id="question-progress">Câu 1/130</span>
+                <span id="timer-display" style="display: none; color: #e74c3c; font-weight: bold;">Thời gian: 60:00</span>
                 <span id="score-display">Điểm: 0</span>
             </div>
             <div id="question-container">

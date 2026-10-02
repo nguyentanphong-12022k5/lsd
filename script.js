@@ -11,9 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const questionText = document.getElementById('question-text');
     const optionsContainer = document.getElementById('options-container');
     const finalScore = document.getElementById('final-score');
+    const timerDisplay = document.getElementById('timer-display');
     
     // buttons
     const startBtn = document.getElementById('start-btn');
+    const examBtn = document.getElementById('exam-btn');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const finishBtn = document.getElementById('finish-btn');
@@ -21,19 +23,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentQuestionIndex = 0;
     let score = 0;
-    let userAnswers = []; // store user selected index
-    let quizQuestions = []; // store randomized questions
+    let userAnswers = [];
+    let quizQuestions = [];
+    
+    // Timer variables
+    let timerInterval = null;
+    let timeLeft = 0;
 
     // initialize
     if (typeof questions !== 'undefined') {
         totalQCount.textContent = questions.length;
     }
 
-    startBtn.addEventListener('click', startQuiz);
+    startBtn.addEventListener('click', () => startQuiz(false));
+    if (examBtn) examBtn.addEventListener('click', () => startQuiz(true));
     prevBtn.addEventListener('click', () => loadQuestion(currentQuestionIndex - 1));
     nextBtn.addEventListener('click', () => loadQuestion(currentQuestionIndex + 1));
     finishBtn.addEventListener('click', endQuiz);
-    restartBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', () => switchScreen(setupScreen)); // Go back to setup to choose mode
     
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -42,17 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function startQuiz() {
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function startQuiz(isExamMode) {
         if (!questions || questions.length === 0) {
             alert('Không tìm thấy dữ liệu câu hỏi!');
             return;
         }
         
-        // Deep copy to randomize without affecting original array
-        quizQuestions = JSON.parse(JSON.stringify(questions));
+        // Deep copy
+        let allQuestions = JSON.parse(JSON.stringify(questions));
         
-        // Shuffle questions
-        shuffleArray(quizQuestions);
+        // Shuffle all questions
+        shuffleArray(allQuestions);
+        
+        // If exam mode, take only 60 questions
+        if (isExamMode && allQuestions.length >= 60) {
+            quizQuestions = allQuestions.slice(0, 60);
+        } else {
+            quizQuestions = allQuestions;
+        }
+
         
         // Shuffle options for each question
         quizQuestions.forEach(q => {
@@ -66,6 +87,26 @@ document.addEventListener('DOMContentLoaded', () => {
         currentQuestionIndex = 0;
         score = 0;
         userAnswers = new Array(quizQuestions.length).fill(null);
+        
+        // Start Timer if exam mode
+        clearInterval(timerInterval);
+        if (isExamMode) {
+            timeLeft = 60 * 60; // 60 minutes
+            timerDisplay.style.display = 'inline';
+            timerDisplay.textContent = `Thời gian: ${formatTime(timeLeft)}`;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Thời gian: ${formatTime(timeLeft)}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Đã hết thời gian làm bài!");
+                    endQuiz();
+                }
+            }, 1000);
+        } else {
+            timerDisplay.style.display = 'none';
+        }
         
         switchScreen(quizScreen);
         loadQuestion(0);
@@ -144,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function endQuiz() {
+        clearInterval(timerInterval);
         switchScreen(resultScreen);
         finalScore.textContent = `Bạn đã trả lời đúng ${score}/${quizQuestions.length} câu.`;
     }
