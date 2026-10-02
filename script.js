@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuestionIndex = 0;
     let score = 0;
     let userAnswers = []; // store user selected index
+    let quizQuestions = []; // store randomized questions
 
     // initialize
     if (typeof questions !== 'undefined') {
@@ -33,15 +34,38 @@ document.addEventListener('DOMContentLoaded', () => {
     nextBtn.addEventListener('click', () => loadQuestion(currentQuestionIndex + 1));
     finishBtn.addEventListener('click', endQuiz);
     restartBtn.addEventListener('click', startQuiz);
+    
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
 
     function startQuiz() {
         if (!questions || questions.length === 0) {
             alert('Không tìm thấy dữ liệu câu hỏi!');
             return;
         }
+        
+        // Deep copy to randomize without affecting original array
+        quizQuestions = JSON.parse(JSON.stringify(questions));
+        
+        // Shuffle questions
+        shuffleArray(quizQuestions);
+        
+        // Shuffle options for each question
+        quizQuestions.forEach(q => {
+            if (q.answer !== null && q.answer !== undefined) {
+                let correctAnswerText = q.options[q.answer];
+                shuffleArray(q.options);
+                q.answer = q.options.indexOf(correctAnswerText);
+            }
+        });
+
         currentQuestionIndex = 0;
         score = 0;
-        userAnswers = new Array(questions.length).fill(null);
+        userAnswers = new Array(quizQuestions.length).fill(null);
         
         switchScreen(quizScreen);
         loadQuestion(0);
@@ -56,11 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadQuestion(index) {
-        if (index < 0 || index >= questions.length) return;
+        if (index < 0 || index >= quizQuestions.length) return;
         currentQuestionIndex = index;
-        const q = questions[index];
+        const q = quizQuestions[index];
         
-        questionProgress.textContent = `Câu ${index + 1}/${questions.length}`;
+        questionProgress.textContent = `Câu ${index + 1}/${quizQuestions.length}`;
         questionText.textContent = q.question;
         
         optionsContainer.innerHTML = '';
@@ -85,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         prevBtn.disabled = index === 0;
-        nextBtn.textContent = index === questions.length - 1 ? 'Hoàn thành' : 'Câu Tiếp';
+        nextBtn.textContent = index === quizQuestions.length - 1 ? 'Hoàn thành' : 'Câu Tiếp';
         
         // If on last question, next button acts as finish
-        if(index === questions.length - 1) {
+        if(index === quizQuestions.length - 1) {
             nextBtn.onclick = endQuiz;
         } else {
             nextBtn.onclick = () => loadQuestion(currentQuestionIndex + 1);
@@ -98,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectOption(selectedIndex, element) {
         if (userAnswers[currentQuestionIndex] !== null) return; // already answered
         
-        const q = questions[currentQuestionIndex];
+        const q = quizQuestions[currentQuestionIndex];
         userAnswers[currentQuestionIndex] = selectedIndex;
         
         const allOptions = optionsContainer.children;
@@ -113,8 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 allOptions[q.answer].classList.add('correct');
             }
         }
-        
-        // remove click listeners by cloning (simple way) or just let the condition above handle it
     }
 
     function updateScore() {
@@ -123,6 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endQuiz() {
         switchScreen(resultScreen);
-        finalScore.textContent = `Bạn đã trả lời đúng ${score}/${questions.length} câu.`;
+        finalScore.textContent = `Bạn đã trả lời đúng ${score}/${quizQuestions.length} câu.`;
     }
 });
