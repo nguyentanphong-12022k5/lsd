@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Lịch Sử Đảng</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Luyện Tập Trắc Nghiệm Lịch Sử Đảng</h1>
+        
+        <div id="setup-screen" class="screen active">
+            <p>Tổng số câu hỏi: <span id="total-q-count">130</span></p>
+            <button id="start-btn" class="btn primary-btn">Bắt Đầu Luyện Tập</button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="header">
+                <span id="question-progress">Câu 1/130</span>
+                <span id="score-display">Điểm: 0</span>
+            </div>
+            <div id="question-container">
+                <h2 id="question-text">Đang tải câu hỏi...</h2>
+                <div id="options-container" class="options">
+                    <!-- Options will be injected here -->
+                </div>
+            </div>
+            <div class="controls">
+                <button id="prev-btn" class="btn" disabled>Câu Trước</button>
+                <button id="next-btn" class="btn">Câu Tiếp</button>
+            </div>
+            <button id="finish-btn" class="btn danger-btn">Kết Thúc</button>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <h2>Kết Quả Luyện Tập</h2>
+            <p id="final-score">Bạn đã đúng 0/130 câu.</p>
+            <button id="restart-btn" class="btn primary-btn">Luyện Tập Lại</button>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
